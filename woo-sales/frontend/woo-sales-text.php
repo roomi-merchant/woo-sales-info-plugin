@@ -8,5 +8,7 @@ $q = "SELECT * FROM $table_name WHERE `Woo_Product_ID` = $product->id";
 $result = $wpdb->get_results($q);
 
 foreach ($result as $row) {
-    echo '<p>' . $row->Woo_Sales_Text . '</p>';
+    if ($row->Woo_Sales_Text) {
+        echo '<div class="woo-product-label"><p>' . $row->Woo_Sales_Text . '</p></div>';
+    }
 }

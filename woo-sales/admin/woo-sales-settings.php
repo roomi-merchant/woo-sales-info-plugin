@@ -6,9 +6,9 @@ if (isset($_POST['submit'])) {
     global $wpdb, $table_prefix;
     $table_name = $table_prefix . 'woo_sales_info';
 
-    $row_ids        = $_POST['row_id'];
-    $woo_sales_texts = $_POST['woo_sales_text'];
-    $woo_product_ids = $_POST['woo_product_id'];
+    $row_ids = isset($_POST['row_id']) ? array_map('sanitize_text_field', (array) $_POST['row_id']) : [];
+    $woo_sales_texts = isset($_POST['woo_sales_text']) ? array_map('sanitize_text_field', (array) $_POST['woo_sales_text']) : [];
+    $woo_product_ids = isset($_POST['woo_product_id']) ? array_map('sanitize_text_field', (array) $_POST['woo_product_id']) : [];
 
     foreach ($row_ids as $index => $row_id) {
         $data = array(
@@ -35,6 +35,28 @@ if (isset($_POST['submit'])) {
 
 
 if (isset($_POST['add'])) {
+    $row_ids = isset($_POST['row_id']) ? array_map('sanitize_text_field', (array) $_POST['row_id']) : [];
+    $woo_sales_texts = isset($_POST['woo_sales_text']) ? array_map('sanitize_text_field', (array) $_POST['woo_sales_text']) : [];
+    $woo_product_ids = isset($_POST['woo_product_id']) ? array_map('sanitize_text_field', (array) $_POST['woo_product_id']) : [];
+
+    foreach ($row_ids as $index => $row_id) {
+        $data = array(
+            'Woo_Sales_Text' => sanitize_text_field($woo_sales_texts[$index]),
+            'Woo_Product_ID' => intval($woo_product_ids[$index]),
+        );
+
+        $where = array(
+            'ID' => intval($row_id),  // <-- Use primary key, guaranteed unique
+        );
+
+        $updated = $wpdb->update(
+            $table_name,
+            $data,
+            $where,
+            array('%s', '%d'),
+            array('%d')
+        );
+    }
     $data = array(
         'Woo_Sales_Text' => '',
         'Woo_Product_ID' => ''
@@ -43,16 +65,17 @@ if (isset($_POST['add'])) {
 }
 
 if (isset($_GET['remove'])) {
-    $woo_product_id = $_GET['remove'];
+    $woo_remove_id = $_GET['remove'];
 
     $where = array(
-        'Woo_Product_ID' => $woo_product_id
+        'Woo_Product_ID' => $woo_remove_id
     );
     $wpdb->delete($table_name, $where);
-    header('Location: ?page=woo-sales');
+    header('Location: ?page=product-labels');
 }
 ?>
 <div class="wrap">
+    <h2>Add Labels to Products</h2>
     <?php
     $args = array(
         'post_type'      => 'product',
@@ -82,7 +105,7 @@ if (isset($_GET['remove'])) {
 
                 <p>
                     <label for="woo_product_id_<?php echo $index; ?>">Assign Product</label>
-                    <select name="woo_product_id[]" id="woo_product_id_<?php echo $index; ?>">
+                    <select class="woo-product-select" name="woo_product_id[]" id="woo_product_id_<?php echo $index; ?>">
                         <?php
                         if ($query->have_posts()) {
                             while ($query->have_posts()) {
@@ -99,14 +122,14 @@ if (isset($_GET['remove'])) {
                     </select>
                 </p>
 
-                <a href="?page=woo-sales&remove=<?php echo $row->Woo_Product_ID; ?>">Remove</a>
+                <a href="?page=product-labels&remove=<?php echo $row->Woo_Product_ID; ?>">Remove</a>
             </div>
         <?php } ?>
 
         <div class="add-more-btn">
-            <input type="submit" name="add" value="ADD +">
+            <input type="submit" name="submit" value="SUBMIT" class="button button-primary">
+            <input type="submit" name="add" value="ADD +" class="button button-primary">
         </div>
-        <input type="submit" name="submit" value="SUBMIT">
     </form>
     <?php wp_reset_postdata(); ?>
 

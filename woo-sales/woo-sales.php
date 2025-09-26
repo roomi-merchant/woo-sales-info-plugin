@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     die();
 }
 
-add_action('admin_init', __NAMESPACE__.'\\my_woo_addon_check_dependencies');
+add_action('admin_init', __NAMESPACE__ . '\\my_woo_addon_check_dependencies');
 
 function my_woo_addon_check_dependencies()
 {
@@ -20,7 +20,7 @@ function my_woo_addon_check_dependencies()
         deactivate_plugins(plugin_basename(__FILE__));
 
         // Show admin error notice
-        add_action('admin_notices', __NAMESPACE__.'\\my_woo_addon_admin_notice');
+        add_action('admin_notices', __NAMESPACE__ . '\\my_woo_addon_admin_notice');
     }
 }
 
@@ -38,14 +38,14 @@ function my_woo_addon_admin_notice()
 
 function woo_sales_menu()
 {
-    add_menu_page('Woo Sales', 'Woo Sales', 'manage_options', 'woo-sales', __NAMESPACE__ .'\\wooSales', '', 25);
-    add_submenu_page('woo-sales', 'Settings', 'Settings', 'manage_options', 'woo-sales', '');
+    add_menu_page('Product Labels', 'Product Labels', 'manage_options', 'product-labels', __NAMESPACE__ . '\\wooSales', '', 25);
+    add_submenu_page('product-labels', 'Settings', 'Settings', 'manage_options', 'product-labels', '');
 }
 
-add_action('admin_menu', __NAMESPACE__.'\\woo_sales_menu');
+add_action('admin_menu', __NAMESPACE__ . '\\woo_sales_menu');
 
 
-register_activation_hook(__FILE__, 'woo_sales_activate');
+register_activation_hook(__FILE__, __NAMESPACE__ . '\\woo_sales_activate');
 
 function woo_sales_activate()
 {
@@ -85,23 +85,46 @@ function wooSales()
     include 'admin/woo-sales-settings.php';
 }
 
-add_action('woocommerce_product_meta_end', __NAMESPACE__.'\\add_sale_info');
+add_action('woocommerce_before_single_product', __NAMESPACE__ . '\\add_sale_info');
 function add_sale_info()
 {
     include 'frontend/woo-sales-text.php';
 }
 
-function admin_scripts()
+function add_frontend_scripts()
 {
-    $script_path = plugin_dir_path(__FILE__) . 'woo-sales/assets/js/woo-sales-admin.js';
+    $script_path = plugin_dir_path(__FILE__) . 'woo-sales/assets/js/woo-sales.js';
     $script_version = file_exists($script_path) ? filemtime($script_path) : '1.0.0';
 
     wp_enqueue_script(
-        'woo-sales-admin',
-        plugins_url('assets/js/woo-sales-admin.js', __FILE__),
+        'woo-sales-js',
+        plugins_url('assets/js/woo-sales.js', __FILE__),
         array('jquery'),
         $script_version,
         true
     );
+
+    wp_enqueue_style('woo-style', plugins_url('assets/css/woo-sales-style.css', __FILE__), array());
 }
-add_action('admin_enqueue_scripts', __NAMESPACE__. '\\admin_scripts');
+add_action('wp_enqueue_scripts', __NAMESPACE__ . '\\add_frontend_scripts');
+
+
+function add_backend_scripts()
+{
+    $script_path = plugin_dir_path(__FILE__) . 'woo-sales/assets/js/backend/admin-script.js';
+    $script_version = file_exists($script_path) ? filemtime($script_path) : '1.0.0';
+
+    wp_enqueue_script(
+        'woo-sales-js',
+        plugins_url('assets/js/backend/admin-script.js', __FILE__),
+        array('jquery'),
+        $script_version,
+        true
+    );
+
+    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+
+    // Select2 JS
+    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], null, true);
+}
+add_action('admin_enqueue_scripts', __NAMESPACE__ . '\\add_backend_scripts');
