@@ -78,7 +78,7 @@ function woo_sales_deactivate()
     // $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
 }
 
-register_deactivation_hook(__FILE__, 'woo_sales_deactivate');
+register_deactivation_hook(__FILE__, __NAMESPACE__ . '\\woo_sales_deactivate');
 
 function wooSales()
 {
@@ -128,3 +128,4 @@ function add_backend_scripts()
     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], null, true);
 }
 add_action('admin_enqueue_scripts', __NAMESPACE__ . '\\add_backend_scripts');
+
