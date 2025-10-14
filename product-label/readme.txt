@@ -1,5 +1,5 @@
 === Product Label ===
-Contributors: Roomi Merchant
+Contributors: roomimerchant
 Tags: woocommerce, custom labels, sales text, product labels
 Requires at least: 5.8
 Tested up to: 6.8

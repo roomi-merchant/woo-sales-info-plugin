@@ -1,20 +1,23 @@
 <?php
+
+if (! defined('ABSPATH')) exit; // Exit if accessed directly
+
 global $wpdb, $table_prefix;
 $table_name = $table_prefix . 'woo_sales_info';
 
-if (isset($_POST['submit']) || isset($_POST['add'])) {
+
+if (isset($_POST['submit'])) {
     if (
         ! sanitize_text_field(wp_unslash($_POST['save_product_labels_nonce']))
         || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['save_product_labels_nonce'])), 'save_product_labels')
     ) {
         // Nonce check failed — reject request
-        return;
+        wp_die('Security check failed');
     }
-}
 
-if (isset($_POST['submit'])) {
-    global $wpdb, $table_prefix;
-    $table_name = $table_prefix . 'woo_sales_info';
+    if (!current_user_can('manage_options')) {
+        wp_die('You do not have permission to perform this action.');
+    }
 
     $row_ids = isset($_POST['row_id']) ? array_map('sanitize_text_field', (array) wp_unslash($_POST['row_id'])) : [];
     $woo_sales_texts = isset($_POST['woo_sales_text']) ? array_map('sanitize_text_field', (array) wp_unslash($_POST['woo_sales_text'])) : [];
@@ -46,6 +49,18 @@ if (isset($_POST['submit'])) {
 
 
 if (isset($_POST['add'])) {
+    if (
+        ! sanitize_text_field(wp_unslash($_POST['save_product_labels_nonce']))
+        || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['save_product_labels_nonce'])), 'save_product_labels')
+    ) {
+        // Nonce check failed — reject request
+        wp_die('Security check failed');
+    }
+
+    if (!current_user_can('manage_options')) {
+        wp_die('You do not have permission to perform this action.');
+    }
+
     $row_ids = isset($_POST['row_id']) ? array_map('sanitize_text_field', (array) wp_unslash($_POST['row_id'])) : [];
     $woo_sales_texts = isset($_POST['woo_sales_text']) ? array_map('sanitize_text_field', (array) wp_unslash($_POST['woo_sales_text'])) : [];
     $woo_product_ids = isset($_POST['woo_product_id']) ? array_map('sanitize_text_field', (array) wp_unslash($_POST['woo_product_id'])) : [];
@@ -77,14 +92,33 @@ if (isset($_POST['add'])) {
 }
 
 if (isset($_GET['remove'])) {
-    $woo_remove_id = sanitize_text_field(wp_unslash($_GET['remove']));
+    $woo_remove_id = intval($_GET['remove']);
 
-    $where = array(
-        'Woo_Product_ID' => $woo_remove_id
+    // Verify nonce (for URL-based action)
+    if (
+        ! isset($_REQUEST['_wpnonce'])
+        || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['_wpnonce'])), 'remove_label_' . $woo_remove_id)
+    ) {
+        wp_die('Security check failed');
+    }
+
+    // Check user capability
+    if (!current_user_can('manage_options')) {
+        wp_die('You do not have permission to perform this action.');
+    }
+
+    // Safe delete
+    $wpdb->delete(
+        $table_name,
+        array('Woo_Product_ID' => $woo_remove_id),
+        array('%d')
     );
-    $wpdb->delete($table_name, $where);
-    header('Location: ?page=product-labels');
+
+    // Redirect safely back to the admin page
+    wp_safe_redirect(admin_url('admin.php?page=product-labels'));
+    exit;
 }
+
 ?>
 <div class="wrap">
     <h2>Add Labels to Products</h2>

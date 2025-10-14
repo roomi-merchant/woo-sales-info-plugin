@@ -132,3 +132,4 @@ function add_backend_scripts()
     wp_enqueue_script('select2', plugin_dir_url(__FILE__) . 'assets/js/backend/select2.min.js', ['jquery'], null, true);
 }
 add_action('admin_enqueue_scripts', __NAMESPACE__ . '\\add_backend_scripts');
+

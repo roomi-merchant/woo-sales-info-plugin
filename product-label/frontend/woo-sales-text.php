@@ -1,6 +1,8 @@
 <?php
 
-global $wpdb, $table_prefix, $product;
+if (! defined('ABSPATH')) exit; // Exit if accessed directly
+
+global $wpdb, $table_prefix, $product, $post;
 $table_name = $table_prefix . 'woo_sales_info';
 
 $result = $wpdb->get_results(
