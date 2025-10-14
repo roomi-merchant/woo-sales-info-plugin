@@ -131,11 +131,7 @@ if (isset($_GET['remove'])) {
     $query = new WP_Query($args);
 
     // $q = $wpdb->prepare("SELECT * FROM $table_name ORDER BY ID ASC;");
-    $result = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT * FROM {$table_name} ORDER BY ID ASC"
-        )
-    );
+    $result = $wpdb->get_results("SELECT * FROM {$table_name} ORDER BY ID ASC");
 
     ?>
     <form action="<?php echo esc_url(get_the_permalink()); ?>" method="post">
