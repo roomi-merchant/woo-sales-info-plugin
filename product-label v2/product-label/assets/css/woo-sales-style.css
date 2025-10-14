@@ -1,0 +1,18 @@
+.woocommerce-product-gallery__wrapper .woo-product-label {
+    display: block;
+}
+
+.woo-product-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: black;
+    color: white;
+    padding: 7px;
+    font-size: 12px;
+    display: none;
+}
+
+.woo-product-label p {
+    margin: 0;
+}
